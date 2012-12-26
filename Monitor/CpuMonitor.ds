@@ -1,0 +1,55 @@
+// written by okachin
+
+import("dshell");
+import("konoha.json");
+import("cstyle");
+
+const DCaseContext = Json;
+
+@Public boolean CpuMonitor(DCaseContext ctx) {
+	String item = ctx.getString("item");
+	int interval = ctx.getInt("interval");
+	int times = ctx.getInt("times");
+	int pos;
+	if(!(interval > 1)) {
+		return false;
+	}
+	if(!(times > 0)) {
+		return false;
+	}
+	if(item == "us") {
+		pos = 12;
+	}
+	else if(item == "sy") {
+		pos = 13;
+	}
+	else if(item == "id") {
+		pos = 14;
+	}
+	else if(item == "wa") {
+		pos = 15;
+	}
+	else {
+		return false;
+	}
+
+	int n = 0;
+	String data;
+	while(n < times) {
+		data = $(vmstat 1 2);
+		System.p("cpu(" + item + "): " + data.split("\n")[3].split(" ")[pos] + "[%]");
+		$(sleep 1);
+		n += 1;
+	}
+	return true;
+}
+
+void test() {
+	DCaseContext ctx = new DCaseContext();
+	ctx.setString("item", "sy");
+	ctx.setInt("interval", 2);
+	ctx.setInt("times", 5);
+	CpuMonitor(ctx);
+}
+
+test();
