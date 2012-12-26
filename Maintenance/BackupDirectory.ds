@@ -1,0 +1,22 @@
+// written by chenji
+
+import("dshell");
+import("konoha.json");
+
+const DCaseContext = Json;
+
+@Public boolean BackupDirectory(DCaseContext ctx) {
+	String sourcedir = ctx.getString("Source");
+	String destdir = ctx.getString("Destination");
+	System.p("backup from " + sourcedir + " to " + destdir);
+	return true;
+}
+
+void test() {
+	DCaseContext ctx = new Json();
+	ctx.setString("Source", "sourcedir");
+	ctx.setString("Destination", "destdir");
+	BackupDirectory(ctx);
+}
+
+test();
