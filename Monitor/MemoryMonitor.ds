@@ -1,0 +1,55 @@
+// written by okachin
+
+import("dshell");
+import("konoha.json");
+import("cstyle");
+
+const DCaseContext = Json;
+
+@Public boolean MemoryMonitor(DCaseContext ctx) {
+	String item = ctx.getString("item");
+	int interval = ctx.getInt("interval");
+	int times = ctx.getInt("times");
+	int pos;
+	if(!(interval > 1)) {
+		return false;
+	}
+	if(!(times > 0)) {
+		return false;
+	}
+	if(item == "swpd") {
+		pos = 2;
+	}
+	else if(item == "free") {
+		pos = 3;
+	}
+	else if(item == "buff") {
+		pos = 4;
+	}
+	else if(item == "cache") {
+		pos = 5;
+	}
+	else {
+		return false;
+	}
+
+	int n = 0;
+	String data;
+	while(n < times) {
+		data = $(vmstat 1 2);
+		System.p("memory(" + item + "): " + data.split("\n")[3].split(" ")[pos] + "[%]");
+		$(sleep 1);
+		n += 1;
+	}
+	return true;
+}
+
+void test() {
+	DCaseContext ctx = new DCaseContext();
+	ctx.setString("item", "swpd");
+	ctx.setInt("interval", 2);
+	ctx.setInt("times", 5);
+	MemoryMonitor(ctx);
+}
+
+test();
