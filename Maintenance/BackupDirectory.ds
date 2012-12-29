@@ -9,14 +9,28 @@ const DCaseContext = Json;
 	String sourcedir = ctx.getString("Source");
 	String destdir = ctx.getString("Destination");
 	System.p("backup from " + sourcedir + " to " + destdir);
-	return true;
+	test -d "${destdir}/backup.0";
+	if($? == 0) {
+		rm -rf "${destdir}/backup.3";
+		mv "${destdir}/backup.2" "${destdir}/backup.3";
+		mv "${destdir}/backup.1" "${destdir}/backup.2";
+		mv "${destdir}/backup.0" "${destdir}/backup.1";
+	}
+	rsync -v --archive --delete -F --link-dest=../backup.1 "${sourcedir}" "${destdir}/backup.pre";
+	if($? == 0) {
+		mv "${destdir}/backup.pre" "${destdir}/backup.0";
+		return true;
+	}
+	return false;
 }
 
-void test() {
+void main() {
 	DCaseContext ctx = new Json();
-	ctx.setString("Source", "sourcedir");
-	ctx.setString("Destination", "destdir");
-	BackupDirectory(ctx);
+	ctx.setString("Source", "/path/to/sourcedir");
+	System.p(ctx.getString("Source"));
+	ctx.setString("Destination", "/path/to/destdir");
+	System.p(ctx.getString("Destination"));
+	System.p(BackupDirectory(ctx));
 }
 
-test();
+main();
