@@ -1,0 +1,81 @@
+// written by chen_ji
+
+import("dshell");
+import("konoha.json");
+
+const DCaseContext = Json;
+
+boolean BackupFilesystem(DCaseContext ctx) {
+	String remoteDirectory = ctx.getString("RemoteDirectory");
+	String remoteIp = ctx.getString("RemoteIp");
+	String localBackupLocation = ctx.getString("LocalBackupLocation");
+	String diskPartition = ctx.getString("DiskPartition");
+	String bootFileSystem = ctx.getString("BootFileSystem");
+	String rootFileSystem = ctx.getString("RootFileSystem");
+	String swapFileSystem = ctx.getString("SwapFileSystem");
+	String bootBackupFile = ctx.getString("BootBackupFile");
+	String rootBackupFile = ctx.getString("RootBackupFile");
+	String restoreMountPoint = ctx.getString("RestoreMountPoint");
+
+	// mount NFS
+	mkdir "${localBackupLocation}";
+	mount "${remoteIp}:${remoteDirectory}" "${localBackupLocation}";
+
+	// create Disk Partition
+	fdisk "${diskPartition}";
+
+	// format and set label
+	mke2fs -j "${bootFileSystem}";
+	mke2fs -j "${rootFileSystem}";
+	e2label "${bootFileSystem}" "/boot";
+	e2label "${rootFileSystem}" "/";
+
+	// format swap partition
+	mkswap -L SWAP-sda3 "${swapFileSystem}";
+
+	// create mount point for restore
+	mkdir "${restoreMountPoint}";
+
+	// do restore
+	mount "${bootFileSystem}" "${restoreMountPoint}";
+	cd "${restoreMountPoint}";
+	restore -r -f "${bootBackupFile}";
+	cd ..;
+	umount "${restoreMountPoint}";
+
+	mount "${rootFileSystem}" "${restoreMountPoint}";
+	cd "${restoreMountPoint}";
+	restore -r -f "${rootBackupFile}";
+	cd ..;
+	umount "${restoreMountPoint}";
+
+	// reinstall boot loader
+	mount "${rootFileSystem}" "${restoreMountPoint}";
+	chroot "${restoreMountPoint}";
+	mount -t proc none "/proc";
+	mount -t sysfs none "/sys";
+	mount -o mode=0755 -t tmpfs none "/dev";
+	start_udev;
+	mount "${bootFileSystem}" "/boot";
+
+	// reinstall grub
+	grub-install "${diskPartition}";
+	return ($? == 0);
+}
+
+void main() {
+	DCaseContext ctx = new DCaseContext();
+	ctx.setString("RemoteDirectory", "/backup");
+	ctx.setString("RemoteIp", "192.168.1.26");
+	ctx.setString("LocalBackupLocation", "/mnt/backup");
+	ctx.setString("DiskPartition", "/dev/sda");
+	ctx.setString("BootFileSystem", "/dev/sda1");
+	ctx.setString("RootFileSystem", "/dev/sda2");
+	ctx.setString("SwapFileSystem", "/dev/sda3");
+	ctx.setString("BootBackupFile", "/mnt/backup/sda1.dump");
+	ctx.setString("RootBackupFile", "/mnt/backup/sda2.dump");
+	ctx.setString("RestoreMountPoint", "/mnt/sysimage");
+	BackupFilesystem(ctx);
+}
+
+main();

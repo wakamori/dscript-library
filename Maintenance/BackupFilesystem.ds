@@ -20,8 +20,12 @@ boolean BackupFilesystem(DCaseContext ctx) {
 	mount "${remoteIp}:${remoteDirectory}" "${localBackupLocation}";
 	String bootdev = getDevName(bootFileSystem);
 	String rootdev = getDevName(rootFileSystem);
-	dump -0 -z9 -f "${localBackupLocation}${bootdev}.dump" "${bootFileSystem}";
-	dump -0 -z9 -f "${localBackupLocation}${rootdev}.dump" "${rootFileSystem}";
+	String bootBackupFile = "${localBackupLocation}${bootdev}.dump";
+	String rootBackupFile = "${localBackupLocation}${rootdev}.dump";
+	ctx.setString("BootBackupFile", bootBackupFile);
+	ctx.setString("RootBackupFile", rootBackupFile);
+	dump -0 -z9 -f "${bootBackupFile}" "${bootFileSystem}";
+	dump -0 -z9 -f "${rootBackupFile}" "${rootFileSystem}";
 	umount "${localBackupLocation}";
 	return ($? == 0);
 }
