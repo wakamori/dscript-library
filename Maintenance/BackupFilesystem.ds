@@ -1,0 +1,39 @@
+// written by chen_ji
+
+import("dshell");
+import("konoha.json");
+
+const DCaseContext = Json;
+
+String getDevName(String path) {
+	return path.substr(path.lastIndexOf("/"));
+}
+
+boolean BackupFilesystem(DCaseContext ctx) {
+	String remoteDirectory = ctx.getString("RemoteDirectory");
+	String remoteIp = ctx.getString("RemoteIp");
+	String localBackupLocation = ctx.getString("LocalBackupLocation");
+	String bootFileSystem = ctx.getString("BootFileSystem");
+	String rootFileSystem = ctx.getString("RootFileSystem");
+
+	mkdir "${localBackupLocation}";
+	mount "${remoteIp}:${remoteDirectory}" "${localBackupLocation}";
+	String bootdev = getDevName(bootFileSystem);
+	String rootdev = getDevName(rootFileSystem);
+	dump -0 -z9 -f "${localBackupLocation}${bootdev}.dump" "${bootFileSystem}";
+	dump -0 -z9 -f "${localBackupLocation}${rootdev}.dump" "${rootFileSystem}";
+	umount "${localBackupLocation}";
+	return ($? == 0);
+}
+
+void main() {
+	DCaseContext ctx = new DCaseContext();
+	ctx.setString("RemoteDirectory", "/backup");
+	ctx.setString("RemoteIp", "192.168.1.26");
+	ctx.setString("LocalBackupLocation", "/mnt/backup");
+	ctx.setString("BootFileSystem", "/dev/sda1");
+	ctx.setString("RootFileSystem", "/dev/sda2");
+	BackupFilesystem(ctx);
+}
+
+main();

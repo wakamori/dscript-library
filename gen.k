@@ -6,8 +6,8 @@ import("cstyle");
 const TEMPLATE = "template.ds";
 
 String getInput(String text) {
-	stdout.println();
-	stdout.print(text);
+	echo;
+	stdout.print("${text}");
 	return stdin.readLine();
 }
 
@@ -16,6 +16,7 @@ String[] getDirectories() {
 }
 
 boolean generateFile(String type, String name, String filename) {
+	echo "Generating ${type}/${filename}.ds";
 	File input = new File(TEMPLATE, "r");
 	File output = new File(type + "/" + filename + ".ds", "w");
 	output.print(input.readAll().replace("%YourName%", name).replace("%MethodName%", filename));
@@ -25,17 +26,17 @@ boolean generateFile(String type, String name, String filename) {
 void main() {
 	String[] types = getDirectories();
 	for(int i = 0; i < types.getlength(); i++) {
-		stdout.println("[${i}]: ${types[i]}");
+		echo "[${i}]: ${types[i]}";
 	}
 	int type = getInput("Enter type of script: ").toint();
 	String type = types[type];
-	stdout.println("type: " + type);
+	echo "type: ${type}";
 	String name = getInput("Enter your name: ");
-	stdout.println("name: " + name);
+	echo "name: ${name}";
 	String filename = getInput("Enter file name: ");
-	stdout.println("filename: " + filename);
+	echo "filename: ${filename}";
 	generateFile(type, name, filename);
-	stdout.println("Finished!");
+	echo "Finished!";
 }
 
 main();
