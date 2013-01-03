@@ -6,8 +6,10 @@ import("konoha.json");
 const DCaseContext = Json;
 
 @Public boolean BackupDirectory(DCaseContext ctx) {
-	String sourcedir = ctx.getString("Source");
-	String destdir = ctx.getString("Destination");
+	String sourcedir = ctx.getString("SourceDirectory");
+	String destdir = ctx.getString("DestinationDirectory");
+	String ipaddr = ctx.getString("DestinationIp");
+	String user = ctx.getString("DestinationUser");
 	System.p("backup from " + sourcedir + " to " + destdir);
 	test -d "${destdir}/backup.0";
 	if($? == 0) {
@@ -16,7 +18,7 @@ const DCaseContext = Json;
 		mv "${destdir}/backup.1" "${destdir}/backup.2";
 		mv "${destdir}/backup.0" "${destdir}/backup.1";
 	}
-	rsync -v --archive --delete -F --link-dest=../backup.1 "${sourcedir}" "${destdir}/backup.pre";
+	rsync -v --archive --delete -F --link-dest=../backup.1 "${user}@${ipaddr}:${sourcedir}" "${destdir}/backup.pre";
 	if($? == 0) {
 		mv "${destdir}/backup.pre" "${destdir}/backup.0";
 		return true;
@@ -26,10 +28,10 @@ const DCaseContext = Json;
 
 void main() {
 	DCaseContext ctx = new Json();
-	ctx.setString("Source", "/path/to/sourcedir");
-	System.p(ctx.getString("Source"));
-	ctx.setString("Destination", "/path/to/destdir");
-	System.p(ctx.getString("Destination"));
+	ctx.setString("SourceDirectory", "/path/to/sourcedir");
+	ctx.setString("DestinationDirectory", "/path/to/destdir");
+	ctx.setString("DestinationIp", "ipaddr");
+	ctx.setString("DestinationUser", "user");
 	System.p(BackupDirectory(ctx));
 }
 
