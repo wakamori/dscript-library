@@ -1,0 +1,25 @@
+// written by chen_ji
+
+import("dshell");
+import("konoha.json");
+
+const DCaseContext = Json;
+
+boolean BackupMysqldOffline(DCaseContext ctx) {
+	String sourceDirectory = ctx.getString("MysqlSourceDirectory");
+	String destinationDirectory = ctx.getString("MysqlDestinationDirectory");
+
+	/etc/init.d/mysqld stop;
+	rsync -av "${sourceDirectory}" "${destinationDirectory}";
+	/etc/init.d/mysqld start;
+	return ($? == 0);
+}
+
+void main() {
+	DCaseContext ctx = new DCaseContext();
+	ctx.setString("MysqlSourceDirectory", "/var/lib/mysql");
+	ctx.setString("MysqlDestinationDirectory", "/tmp/mysql-backup");
+	BackupMysqldOffline(ctx);
+}
+
+main();
