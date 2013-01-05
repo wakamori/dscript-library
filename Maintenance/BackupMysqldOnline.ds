@@ -1,0 +1,27 @@
+// written by chen_ji
+
+import("dshell");
+import("konoha.json");
+
+const DCaseContext = Json;
+
+boolean BackupMysqldOnline(DCaseContext ctx) {
+	String mysqlUser = ctx.getString("MysqlUser");
+	String mysqlPassword = ctx.getString("MysqlPassword");
+	String mysqlDatabase = ctx.getString("MysqlDatabase");
+	String backupDirectory = ctx.getString("BackupDirectory");
+
+	/usr/local/bin/mysqlhotcopy -u "${mysqlUser}" -p "${mysqlPassword}" "${mysqlDatabase}" "${backupDirectory}";
+	return ($? == 0);
+}
+
+void main() {
+	DCaseContext ctx = new DCaseContext();
+	ctx.setString("MysqlUser", "user");
+	ctx.setString("MysqlPassword", "moodle");
+	ctx.setString("MysqlDatabase", "moodle");
+	ctx.setString("BackupDirectory", "/tmp");
+	System.p(BackupMysqldOnline(ctx));
+}
+
+main();
