@@ -1,0 +1,25 @@
+// written by chen_ji
+
+import("dshell");
+import("konoha.json");
+
+const DCaseContext = Json;
+
+boolean BackupMysqldOnlineAll(DCaseContext ctx) {
+	String mysqlUser = ctx.getString("MysqlUser");
+	String mysqlPassword = "-p" + ctx.getString("MysqlPassword");
+	String backupFilename = ctx.getString("BackupFilename");
+
+	/usr/local/bin/mysqldump -u "${mysqlUser}" "${mysqlPassword}" -x --all-databases > "${backupFilename}";
+	return ($? == 0);
+}
+
+void main() {
+	DCaseContext ctx = new DCaseContext();
+	ctx.setString("MysqlUser", "user");
+	ctx.setString("MysqlPassword", "pass");
+	ctx.setString("BackupFilename", "/tmp/mysql.dump");
+	System.p(BackupMysqldOnlineAll(ctx));
+}
+
+main();

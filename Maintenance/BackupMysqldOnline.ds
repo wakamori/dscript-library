@@ -18,8 +18,8 @@ boolean BackupMysqldOnline(DCaseContext ctx) {
 void main() {
 	DCaseContext ctx = new DCaseContext();
 	ctx.setString("MysqlUser", "user");
-	ctx.setString("MysqlPassword", "moodle");
-	ctx.setString("MysqlDatabase", "moodle");
+	ctx.setString("MysqlPassword", "pass");
+	ctx.setString("MysqlDatabase", "dbname");
 	ctx.setString("BackupDirectory", "/tmp");
 	System.p(BackupMysqldOnline(ctx));
 }

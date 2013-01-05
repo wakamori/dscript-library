@@ -19,7 +19,7 @@ void main() {
 	DCaseContext ctx = new DCaseContext();
 	ctx.setString("MysqlSourceDirectory", "/var/lib/mysql");
 	ctx.setString("MysqlDestinationDirectory", "/tmp/mysql-backup");
-	BackupMysqldOffline(ctx);
+	System.p(BackupMysqldOffline(ctx));
 }
 
 main();
