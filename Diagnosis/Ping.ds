@@ -1,0 +1,49 @@
+// written by Joseph
+
+import("dshell");
+import("konoha.json");
+
+const DCaseContext = Json;
+
+String host = "";
+
+boolean Test(DCaseContext ctx) {
+	host = ctx.getString("hostname");
+	System.p(host);
+	String res = $(ping "${host}" -c 4);
+	System.p(res);
+	if (res.search("unknown host") != -1) {
+		String lookup = $(minikonoha Nslookup.ds);
+		System.p(lookup);
+		if (lookup == "Host is not found.") {
+			System.p("UserFault:Hostname is incorrect.");
+			return false;
+		}
+		System.p("ExternalFault:The server doesn't allow ping.");
+		return false;
+	} else if (res.search("Network is unreachable") != -1) {
+		System.p("SystemFault:Your PC is disconnected.");
+		return false;
+	} else if (res.search("Destination Host Unreachable") != -1) {
+		System.p("ExternalFault:Host is not found.");
+		return false;
+	} else if (res.search("Destination Net Unreachable") != -1) {
+		System.p("SystemFault:Dafault gateway is not set.");
+		return false;
+	} else if (res.search("Request timed out") != -1) {
+		System.p("ExternalFault:Server doesn't respond.");
+		return false;
+	} else if (res.search("Time to live exceeded") != -1) {
+		System.p("It's too far to the server.");
+		return false;
+	}
+	return ($? == 0);
+}
+
+void main() {
+	DCaseContext ctx = new DCaseContext();
+	ctx.setString("hostname", "www.google.com");
+	System.p(Test(ctx));
+}
+
+main();
