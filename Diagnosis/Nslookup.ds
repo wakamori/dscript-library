@@ -1,0 +1,29 @@
+// written by Joseph
+
+import("dshell");
+import("konoha.json");
+import("konoha.string");
+
+const DCaseContext = Json;
+
+String host = "";
+
+boolean Nslookup(DCaseContext ctx) {
+	host = ctx.getString("hostname");
+	String res = $(nslookup "${host}" -timeout=1);
+	if (res.search("server can't find") == -1) {
+		System.p("Name Resolution Success.");
+		return true;
+	} else {
+		System.p("Host is not found.");
+		return false;
+	}
+}
+
+void main() {
+	DCaseContext ctx = new DCaseContext();
+	ctx.setString("hostname", "www.google.com");
+	Nslookup(ctx);
+}
+
+main();
